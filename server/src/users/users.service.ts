@@ -1,54 +1,64 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { User } from './users.model'
+import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
+import { User } from "./user.model";
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class UsersService {
-    private users: User[] = [];
+    constructor(
+        @InjectModel(User)
+        private userModel: typeof User,
+      ) {}
 
-    registerUser(name: string, email: string, password: string, avatar: string){
-        const id = Math.random().toString()
-        const newUser = new User(id, name, email, password, avatar)
-        this.users.push(newUser)
-        return id
-    }
-
-    getAllUsers(){
-        return [...this.users];
-    }
-
-    getUserById(id: string){
-        const user = this.findUser(id)[0]
-        return {...user}
-    }
-
-    editAvatar(id: string, avatar: string){
-        const [user, index] = this.findUser(id)
-        this.users[index] = {
-            ...user,
+    async registerUser(name: string, email: string, password: string, avatar: string){
+        const newUser = await this.userModel.create({
+            name,
+            email,
+            password,
             avatar
+        })
+        return newUser
+        
+    }
+
+    getAllUsers(): Promise<User[]>{
+        return this.userModel.findAll();
+    }
+
+    async getUserById(id: string){
+        const foundUser = await this.userModel.findOne({
+            where: {
+              id,
+            },
+        });
+
+        if(!foundUser){
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: `User with id ${id} was not found`
+            }, HttpStatus.NOT_FOUND)
         }
+        else {
+            return foundUser
+        }
+    }
+
+    async editAvatar(id: string, avatar: string){
+        await this.userModel.update({avatar}, {
+            where: {
+                id
+            }
+        })
         return {
             message: 'Your avatar has been successfully changed'
         }
     }
 
-    deleteUser(id: string){
-        const [_, userIndex] = this.findUser(id)
-        this.users.splice(userIndex, 1)
 
+    async deleteUser(id: string): Promise<object> {
+        const user = await this.getUserById(id);
+        await user.destroy();
         return {
             message: 'Your account has been successfully deleted'
         }
-    }
-
-    private findUser(id: string): [User, number]{
-        const userIndex = this.users.findIndex(user => user.id === id)
-        const user = this.users[userIndex]
-
-        if(!user){
-            throw new NotFoundException(`User with id ${id} was not found`)
-        }
-
-        return [user, userIndex]
     }
 }
