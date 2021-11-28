@@ -13,10 +13,7 @@ export class UsersController {
         @Body('password') password: string,
         @Body('avatar') avatar: string,
     ) {
-        const generatedId = this.userService.registerUser(name, email, password, avatar)
-        return {
-            id: generatedId
-        };
+        return this.userService.registerUser(name, email, password, avatar)
     }
 
     @Get()
