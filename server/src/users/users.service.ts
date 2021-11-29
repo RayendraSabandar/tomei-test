@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { User } from "./user.model";
 import { InjectModel } from '@nestjs/sequelize';
+import { hashPassword } from "src/helpers/bcrypt";
 
 @Injectable()
 export class UsersService {
@@ -13,11 +14,10 @@ export class UsersService {
         const newUser = await this.userModel.create({
             name,
             email,
-            password,
+            password: hashPassword(password),
             avatar
         })
         return newUser
-        
     }
 
     getAllUsers(): Promise<User[]>{

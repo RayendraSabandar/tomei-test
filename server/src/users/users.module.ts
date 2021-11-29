@@ -1,7 +1,6 @@
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { MulterModule } from "@nestjs/platform-express";
 import { SequelizeModule } from "@nestjs/sequelize";
-import { diskStorage, memoryStorage } from "multer";
 import { User } from "./user.model";
 import { UsersController } from "./users.controller";
 import { UsersService } from "./users.service";
@@ -10,7 +9,6 @@ import { UsersService } from "./users.service";
     imports: [
         SequelizeModule.forFeature([User]),
         MulterModule.register({
-            storage: memoryStorage(),
             dest: './uploads'
         }),],
     controllers: [UsersController],

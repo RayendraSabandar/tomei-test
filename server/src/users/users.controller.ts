@@ -28,10 +28,6 @@ export class UsersController {
         @Body('password') password: string,
         @UploadedFile() file
     ) {
-        const response = {
-            originalname: file.originalname,
-            filename: file.filename,
-        };
         return this.userService.registerUser(name, email, password, file.path);
     }
 
