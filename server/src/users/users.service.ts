@@ -9,7 +9,7 @@ export class UsersService {
         private userModel: typeof User,
       ) {}
 
-    async registerUser(name: string, email: string, password: string, avatar: string){
+    async registerUser(name: string, email: string, password: string, avatar: any){
         const newUser = await this.userModel.create({
             name,
             email,

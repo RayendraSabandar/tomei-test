@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Patch } from "@nestjs/common";
+import { 
+    Controller, 
+    Get, 
+    Post,
+    Put, 
+    Delete, 
+    Body, 
+    Param, 
+    Patch, 
+    UseInterceptors,
+    UploadedFile
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { UsersService } from "./users.service";
 
 
@@ -7,13 +19,20 @@ export class UsersController {
     constructor(private readonly userService: UsersService) {}
 
     @Post()
-    registerUser(
+    @UseInterceptors(
+        FileInterceptor('avatar'),
+    )
+    async registerUser(
         @Body('name') name: string,
         @Body('email') email: string,
         @Body('password') password: string,
-        @Body('avatar') avatar: string,
+        @UploadedFile() file
     ) {
-        return this.userService.registerUser(name, email, password, avatar)
+        const response = {
+            originalname: file.originalname,
+            filename: file.filename,
+        };
+        return this.userService.registerUser(name, email, password, file.path);
     }
 
     @Get()
@@ -27,11 +46,14 @@ export class UsersController {
     }
 
     @Patch(':id')
-    editAvatar(
+    @UseInterceptors(
+        FileInterceptor('avatar'),
+    )
+    async editAvatar(
         @Param('id') id: string,
-        @Body('avatar') avatar: string
+        @UploadedFile() file
     ){
-        return this.userService.editAvatar(id, avatar)
+        return this.userService.editAvatar(id, file.path)
     }
 
     @Delete(':id')
