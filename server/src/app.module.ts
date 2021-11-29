@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer  } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -6,7 +6,7 @@ import { UsersModule } from './users/users.module';
 import { User } from './users/user.model'
 import { AllExceptionFilter } from './core/all-exepctions-filter';
 import { APP_FILTER } from '@nestjs/core';
-
+import { LoggerMiddleware } from './middlewares/logger.middleware';
 
 @Module({
 	imports: [
@@ -31,4 +31,10 @@ import { APP_FILTER } from '@nestjs/core';
 		useClass: AllExceptionFilter
 	}],
 })
-export class AppModule {}
+export class AppModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer
+		  .apply(LoggerMiddleware)
+		  .forRoutes('users');
+	  }
+}
